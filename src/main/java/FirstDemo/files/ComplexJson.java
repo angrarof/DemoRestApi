@@ -5,6 +5,7 @@ import io.restassured.path.json.JsonPath;
 
 public class ComplexJson {
     public static void main(String[] args) {
+        System.out.println(Payload.CoursePrice());
         JsonPath js = new JsonPath(Payload.CoursePrice());
 
         int count = js.getInt("courses.size()");

@@ -4,29 +4,32 @@ import FirstDemo.files.Files.ReusableMethods;
 import Pojo.Api;
 import Pojo.GetCourse;
 import Pojo.WebAutomation;
-import io.github.bonigarcia.wdm.WebDriverManager;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.filter.log.ResponseLoggingFilter;
 import io.restassured.parsing.Parser;
 import io.restassured.path.json.JsonPath;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import io.restassured.specification.RequestSpecification;
 import org.testng.Assert;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static io.restassured.RestAssured.*;
 
 public class OauthTest {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, FileNotFoundException {
+        PrintStream log = new PrintStream(new FileOutputStream("log.txt"));
+        RequestSpecification req = new RequestSpecBuilder().addFilter(ResponseLoggingFilter.logResponseTo(log)).build();
+
+
         //https://accounts.google.com/o/oauth2/v2/auth?scope=https://www.googleapis.com/auth/userinfo.email&auth_url=https://accounts.google.com/o/oauth2/v2/auth&client_id=692183103107-p0m7ent2hk7suguv4vq22hjcfhcr43pj.apps.googleusercontent.com&response_type=code&redirect_uri=https://rahulshettyacademy.com/getCourse.php&access_type=offline
 
         //Get authorization code
-        String url = "https://rahulshettyacademy.com/getCourse.php?code=4%2F0AY0e-g5dR2H82DsFvHwM1qk8GM9BUxfUybFAEx_EiZyB72pSV_39V96aeIszS2sxksXAng&scope=email+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&authuser=1&prompt=none";
+        String url = "https://rahulshettyacademy.com/getCourse.php?code=4%2F0AY0e-g7hpQrt3FbaooZNfK5CucwNqaJv94V6x1qjdA3QCxiCZX_aAHB6rEoCiSY9Ldtuaw&scope=email+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&authuser=1&prompt=none";
         //String url = urlGoogle;
         String partialCode = url.split("code=")[1];
         System.out.println(partialCode);
@@ -34,7 +37,7 @@ public class OauthTest {
         System.out.println(code);
 
         //Get access token
-        String accessTokenResponse = given().urlEncodingEnabled(false).header("Content-Type","application/x-www-form-urlencoded")
+        String accessTokenResponse = given().log().all().urlEncodingEnabled(false).header("Content-Type","application/x-www-form-urlencoded")
                 .queryParams("code",code)
                 .queryParams("client_id","692183103107-p0m7ent2hk7suguv4vq22hjcfhcr43pj.apps.googleusercontent.com")
                 .queryParams("client_secret", "erZOWM9g3UtwNRj340YYaK_W")
@@ -46,12 +49,11 @@ public class OauthTest {
         String accessToken = js.get("access_token");
         System.out.println(accessTokenResponse);
 
-        //Get courses
-        GetCourse response = given().queryParam("access_token",accessToken).expect().defaultParser(Parser.JSON)
+        //Get courses deserialize
+        GetCourse response = given().spec(req).queryParam("access_token",accessToken).expect().defaultParser(Parser.JSON)
                 .when().get("https://rahulshettyacademy.com/getCourse.php").as(GetCourse.class);
 
         System.out.println(response.getLinkedIn());
-        System.out.println(response.getCourses());
         System.out.println(response.getCourses().getWebAutomation().size());
         System.out.println(response.getCourses().getWebAutomation().get(1).getCourseTitle());
 
@@ -73,7 +75,7 @@ public class OauthTest {
         }
 
         List<String> expectedCourses = Arrays.asList(courses);
-        Assert.assertTrue(actualCourses.equals(expectedCourses));
+        Assert.assertEquals(expectedCourses, actualCourses);
 
     }
 }

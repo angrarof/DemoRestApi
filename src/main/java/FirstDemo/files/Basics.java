@@ -5,6 +5,7 @@ import FirstDemo.files.Files.ReusableMethods;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import org.testng.Assert;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,7 +26,7 @@ public class Basics {
                 .then().assertThat()
                     .statusCode(200).body("scope",equalTo("APP"))
                     .header("server","Apache/2.4.18 (Ubuntu)")
-                    .extract().response().asString();
+                    .extract().response().asPrettyString();
         System.out.println(response);
 
         //Add place -> Update previous place with new address -> Get place to validate new address updated
@@ -55,11 +56,12 @@ public class Basics {
         Assert.assertEquals(actualAddress,newAddress,"Address are not the same");
     }
 
+    @Test
     public static void testAnotherAPI(){
         baseURI = "http://dummy.restapiexample.com";
         String test = given().log().all()
                     .when().get("/api/v1/employee/3")
-                    .then().assertThat().statusCode(200).extract().response().asString();
+                    .then().assertThat().statusCode(200).extract().response().asPrettyString();
         System.out.println(test);
 
         JsonPath js = new JsonPath(test);

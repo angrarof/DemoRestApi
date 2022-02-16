@@ -12,7 +12,7 @@ public class DynamicJson {
 
     @Test(dataProvider="BooksData")
     public void AddBook(String isbn, String aisle){
-        RestAssured.baseURI="http://216.10.245.166";
+        RestAssured.baseURI="https://rahulshettyacademy.com";
         String response = given().header("Content-Type","application/json")
                 .body(Payload.AddBook(isbn,aisle))
                 .when().post("/Library/Addbook.php")

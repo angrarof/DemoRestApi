@@ -21,10 +21,10 @@ public class JiraTest {
         SessionFilter session = new SessionFilter();
 
         //Start session
-        String response = given().relaxedHTTPSValidation().header("Content-Type","application/json")
+        given().relaxedHTTPSValidation().header("Content-Type","application/json")
                 .body("{ \"username\": \"angrarof\", \"password\": \"Aguilara01\" }").filter(session)
-                .when().post("/rest/auth/1/session")
-                .then().log().all().extract().response().asString();
+        .when().post("/rest/auth/1/session")
+        .then().log().all().extract().response().asString();
 
         //Add comment to issue
         String comment = "New comment for rest api from automation: "+LocalDateTime.now();
